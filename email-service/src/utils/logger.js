@@ -1,2 +1,4 @@
-// logger.js
-// Logger utility for Email Service
+const pino = require('pino');
+module.exports = pino({
+  level: process.env.LOG_LEVEL || 'info',
+});

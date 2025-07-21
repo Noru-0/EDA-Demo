@@ -1,2 +1,12 @@
-# cd.yml
-# Continuous Deployment workflow
+name: CD
+on:
+  push:
+    branches: [ main ]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Deploy to Cloud
+      run: echo "Deploy to AWS ECS or Kubernetes"
+      

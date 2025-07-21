@@ -1,2 +1,116 @@
-# docker-compose.yml
-# Docker Compose configuration for EventFlow microservices
+version: '3.8'
+services:
+  gateway:
+    build: ./gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - KAFKA_BROKERS=kafka:9092
+    depends_on:
+      - kafka
+    networks:
+      - eventflow-network
+  user-service:
+    build: ./user-service
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgres://user:password@postgres:5432/userdb
+      - KAFKA_BROKERS=kafka:9092
+    depends_on:
+      - postgres
+      - kafka
+    networks:
+      - eventflow-network
+  event-service:
+    build: ./event-service
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgres://user:password@postgres:5432/eventdb
+      - KAFKA_BROKERS=kafka:9092
+    depends_on:
+      - postgres
+      - kafka
+    networks:
+      - eventflow-network
+  registration-service:
+    build: ./registration-service
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgres://user:password@postgres:5432/registrationdb
+      - KAFKA_BROKERS=kafka:9092
+    depends_on:
+      - postgres
+      - kafka
+    networks:
+      - eventflow-network
+  notification-service:
+    build: ./notification-service
+    environment:
+      - NODE_ENV=production
+      - KAFKA_BROKERS=kafka:9092
+    depends_on:
+      - kafka
+    networks:
+      - eventflow-network
+  email-service:
+    build: ./email-service
+    environment:
+      - NODE_ENV=production
+      - KAFKA_BROKERS=kafka:9092
+    depends_on:
+      - kafka
+    networks:
+      - eventflow-network
+  auditlog-service:
+    build: ./auditlog-service
+    environment:
+      - NODE_ENV=production
+      - MONGO_URL=mongodb://mongo:27017/auditdb
+      - KAFKA_BROKERS=kafka:9092
+    depends_on:
+      - mongo
+      - kafka
+    networks:
+      - eventflow-network
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_MULTIPLE_DATABASES=userdb,eventdb,registrationdb
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - eventflow-network
+  mongo:
+    image: mongo:6
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - eventflow-network
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - eventflow-network
+  kafka:
+    image: confluentinc/cp-kafka:7.3.0
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - eventflow-network
+volumes:
+  postgres-data:
+  mongo-data:
+networks:
+  eventflow-network:
+    driver: bridge
+    

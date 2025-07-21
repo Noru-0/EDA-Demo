@@ -1,2 +1,19 @@
-// index.js
-// Entry point for Email Service
+const fastify = require('fastify')({ logger: true });
+const emailController = require('./controllers/emailController');
+const emailSent = require('./events/emailSent');
+const registrationCreated = require('./events/registrationCreated');
+
+fastify.post('/emails', emailController.sendEmail);
+
+const start = async () => {
+  try {
+    await emailSent();
+    await registrationCreated();
+    await fastify.listen({ port: 3005 });
+    fastify.log.info('Email Service running on port 3005');
+  } catch (err) {
+    fastify.log.error(err);
+    process.exit(1);
+  }
+};
+start();

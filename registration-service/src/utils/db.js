@@ -1,2 +1,6 @@
-// db.js
-// Database utility for Registration Service
+const { Sequelize } = require('sequelize');
+const config = require('../config/database');
+
+const sequelize = new Sequelize(config.databaseUrl);
+
+module.exports = sequelize;

@@ -1,2 +1,6 @@
-// eventSchema.js
-// Event schema definition
+const Joi = require('joi');
+
+module.exports = Joi.object({
+  title: Joi.string().required(),
+  date: Joi.date().required(),
+});

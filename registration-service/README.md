@@ -1,2 +1,7 @@
-# Registration Service
-Handles event registration for EventFlow system.
+Registration Service
+Manages event registrations and emits events to Kafka.
+Setup
+
+Install dependencies: npm install
+Run: npm start
+Requires PostgreSQL and Kafka.

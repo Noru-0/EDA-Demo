@@ -1,2 +1,4 @@
-// database.js
-// Database configuration for User Service
+require('dotenv').config();
+module.exports = {
+  databaseUrl: process.env.DATABASE_URL,
+};

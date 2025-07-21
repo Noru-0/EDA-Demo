@@ -1,2 +1,19 @@
-// index.js
-// Entry point for Registration Service
+const fastify = require('fastify')({ logger: true });
+const registrationController = require('./controllers/registrationController');
+const sequelize = require('./utils/db');
+const registrationCreated = require('./events/registrationCreated');
+
+fastify.post('/registrations', registrationController.createRegistration);
+
+const start = async () => {
+  try {
+    await sequelize.sync();
+    await registrationCreated();
+    await fastify.listen({ port: 3003 });
+    fastify.log.info('Registration Service running on port 3003');
+  } catch (err) {
+    fastify.log.error(err);
+    process.exit(1);
+  }
+};
+start();

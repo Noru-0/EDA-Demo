@@ -1,14 +1,10 @@
 {
-  "name": "eventflow-root",
-  "private": true,
-  "workspaces": [
-    "gateway",
-    "user-service",
-    "event-service",
-    "registration-service",
-    "notification-service",
-    "email-service",
-    "auditlog-service",
-    "shared"
-  ]
+  "name": "eventflow",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "docker-compose up --build",
+    "test": "echo 'Run tests in each service'"
+  },
+  "dependencies": {},
+  "devDependencies": {}
 }
