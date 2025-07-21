@@ -2,6 +2,7 @@ const fastify = require('fastify')({ logger: true });
 const notificationController = require('./controllers/notificationController');
 const notificationSent = require('./events/notificationSent');
 const registrationCreated = require('./events/registrationCreated');
+const { ensureKafkaTopics } = require('../shared/utils/kafkaInit');
 
 fastify.post('/notifications', notificationController.sendNotification);
 

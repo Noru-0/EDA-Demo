@@ -13,6 +13,7 @@ services:
       - KAFKAJS_NO_PARTITIONER_WARNING=1
     depends_on:
       - kafka
+    restart: on-failure
     networks:
       - eventflow-network
 
@@ -29,6 +30,7 @@ services:
     depends_on:
       - postgres
       - kafka
+    restart: on-failure
     networks:
       - eventflow-network
 
@@ -45,6 +47,7 @@ services:
     depends_on:
       - postgres
       - kafka
+    restart: on-failure
     networks:
       - eventflow-network
 
@@ -61,6 +64,7 @@ services:
     depends_on:
       - postgres
       - kafka
+    restart: on-failure
     networks:
       - eventflow-network
 
@@ -75,6 +79,7 @@ services:
     entrypoint: ["sh", "-c", "./shared/wait-for-kafka.sh && node src/index.js"]
     depends_on:
       - kafka
+    restart: on-failure
     networks:
       - eventflow-network
 
@@ -89,6 +94,7 @@ services:
     entrypoint: ["sh", "-c", "./shared/wait-for-kafka.sh && node src/index.js"]
     depends_on:
       - kafka
+    restart: on-failure
     networks:
       - eventflow-network
 
@@ -105,6 +111,7 @@ services:
     depends_on:
       - kafka
       - mongo
+    restart: on-failure
     networks:
       - eventflow-network
 
@@ -148,6 +155,7 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CREATE_TOPICS_ENABLE: 'true'
     networks:
       - eventflow-network
     healthcheck:
@@ -155,6 +163,17 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    
+  kafka-init:
+    image: confluentinc/cp-kafka:7.3.0
+    depends_on:
+      kafka:
+        condition: service_healthy
+    volumes:
+      - ./shared/init-kafka-topics.sh:/init-kafka.sh
+    entrypoint: [ "bash", "/init-kafka.sh" ]
+    networks:
+      - eventflow-network
 
 volumes:
   postgres-data:

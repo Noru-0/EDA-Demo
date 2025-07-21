@@ -4,15 +4,27 @@ const { EVENT_TOPICS } = require('../event-types');
 async function ensureKafkaTopics() {
   const admin = kafkaClient.admin();
   await admin.connect();
-  await admin.createTopics({
-    topics: Object.values(EVENT_TOPICS).map(topic => ({
+
+  const existingTopics = await admin.listTopics();
+
+  const topicsToCreate = Object.values(EVENT_TOPICS)
+    .filter(topic => !existingTopics.includes(topic))
+    .map(topic => ({
       topic,
       numPartitions: 1,
-      replicationFactor: 1
-    })),
-    waitForLeaders: true,
-  });
-  console.log('✅ Kafka topics ensured.');
+      replicationFactor: 1,
+    }));
+
+  if (topicsToCreate.length > 0) {
+    await admin.createTopics({
+      topics: topicsToCreate,
+      waitForLeaders: true,
+    });
+    console.log(`✅ Created Kafka topics: ${topicsToCreate.map(t => t.topic).join(', ')}`);
+  } else {
+    console.log('✅ All Kafka topics already exist.');
+  }
+
   await admin.disconnect();
 }
 
