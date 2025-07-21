@@ -11,7 +11,7 @@ const start = async () => {
     await emailSent();
     await ensureKafkaTopics();
     await registrationCreated();
-    await fastify.listen({ port: 3005 });
+    await fastify.listen({ port: 3005, host: '0.0.0.0' });
     fastify.log.info('Email Service running on port 3005');
   } catch (err) {
     fastify.log.error(err);

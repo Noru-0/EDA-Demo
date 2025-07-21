@@ -6,9 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, MapPin, Users, Clock } from 'lucide-react';
-import type { Event } from '@/app/page';
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
+import type { Event } from '@/app/page';
 
 interface EventDetailModalProps {
   event: Event | null;
@@ -25,7 +25,17 @@ export function EventDetailModal({ event, isOpen, onClose, onRegister }: EventDe
 
   const isFullyBooked = event.registered >= event.capacity;
   const isEnded = event.status === 'ended';
+  const isDisabled = isFullyBooked || isEnded || !userId;
   const availableSpots = event.capacity - event.registered;
+  const eventDate = new Date(event.date).toLocaleDateString('vi-VN', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  const statusLabel = event.status === 'upcoming' ? 'Sắp diễn ra' : 'Đã kết thúc';
+  const badgeVariant = event.status === 'upcoming' ? 'default' : 'secondary';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +48,7 @@ export function EventDetailModal({ event, isOpen, onClose, onRegister }: EventDe
       return;
     }
     onRegister(event.id, userId);
+    setUserId(''); // Reset sau khi đăng ký
   };
 
   return (
@@ -57,56 +68,26 @@ export function EventDetailModal({ event, isOpen, onClose, onRegister }: EventDe
               className="w-full h-64 object-cover rounded-lg"
             />
             <div className="absolute top-4 right-4">
-              <Badge variant={event.status === 'upcoming' ? 'default' : 'secondary'}>
-                {event.status === 'upcoming' ? 'Sắp diễn ra' : 'Đã kết thúc'}
-              </Badge>
+              <Badge variant={badgeVariant}>{statusLabel}</Badge>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center text-gray-600">
-              <Calendar className="h-5 w-5 mr-3" />
-              <div>
-                <p className="font-medium">Ngày tổ chức</p>
-                <p className="text-sm">
-                  {new Date(event.date).toLocaleDateString('vi-VN', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center text-gray-600">
-              <Clock className="h-5 w-5 mr-3" />
-              <div>
-                <p className="font-medium">Thời gian</p>
-                <p className="text-sm">9:00 AM - 5:00 PM</p>
-              </div>
-            </div>
-
-            <div className="flex items-center text-gray-600">
-              <MapPin className="h-5 w-5 mr-3" />
-              <div>
-                <p className="font-medium">Địa điểm</p>
-                <p className="text-sm">{event.location}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center text-gray-600">
-              <Users className="h-5 w-5 mr-3" />
-              <div>
-                <p className="font-medium">Sức chứa</p>
-                <p className="text-sm">
+            <InfoItem icon={Calendar} label="Ngày tổ chức" value={eventDate} />
+            <InfoItem icon={Clock} label="Thời gian" value="9:00 AM - 5:00 PM" />
+            <InfoItem icon={MapPin} label="Địa điểm" value={event.location} />
+            <InfoItem
+              icon={Users}
+              label="Sức chứa"
+              value={
+                <>
                   {event.registered}/{event.capacity} người đã đăng ký
                   {!isEnded && !isFullyBooked && (
                     <span className="text-green-600 ml-1">({availableSpots} chỗ còn lại)</span>
                   )}
-                </p>
-              </div>
-            </div>
+                </>
+              }
+            />
           </div>
 
           <div>
@@ -129,11 +110,7 @@ export function EventDetailModal({ event, isOpen, onClose, onRegister }: EventDe
               <Button type="button" variant="outline" onClick={onClose} className="flex-1 bg-transparent">
                 Đóng
               </Button>
-              <Button
-                type="submit"
-                disabled={isFullyBooked || isEnded || !userId}
-                className="flex-1"
-              >
+              <Button type="submit" disabled={isDisabled} className="flex-1">
                 {isEnded ? 'Sự kiện đã kết thúc' : isFullyBooked ? 'Hết chỗ trống' : 'Đăng ký tham gia'}
               </Button>
             </div>
@@ -141,5 +118,25 @@ export function EventDetailModal({ event, isOpen, onClose, onRegister }: EventDe
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function InfoItem({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center text-gray-600">
+      <Icon className="h-5 w-5 mr-3" />
+      <div>
+        <p className="font-medium">{label}</p>
+        <p className="text-sm">{value}</p>
+      </div>
+    </div>
   );
 }

@@ -3,9 +3,9 @@ const sequelize = require('../utils/db');
 
 const Event = sequelize.define('Event', {
   id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.UUID,
     primaryKey: true,
-    autoIncrement: true,
+    defaultValue: DataTypes.UUIDV4,
   },
   name: {
     type: DataTypes.STRING,
@@ -17,10 +17,11 @@ const Event = sequelize.define('Event', {
   },
   shortDescription: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
+    field: 'short_description',
   },
   date: {
-    type: DataTypes.DATE,
+    type: DataTypes.DATEONLY,
     allowNull: false,
   },
   location: {
@@ -33,7 +34,6 @@ const Event = sequelize.define('Event', {
   },
   registered: {
     type: DataTypes.INTEGER,
-    allowNull: false,
     defaultValue: 0,
   },
   image: {
@@ -41,10 +41,27 @@ const Event = sequelize.define('Event', {
     allowNull: true,
   },
   status: {
-    type: DataTypes.ENUM('upcoming', 'ended'),
-    allowNull: false,
+    type: DataTypes.STRING,
     defaultValue: 'upcoming',
   },
+
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    field: 'createdAt', // Phải match đúng tên SQL column
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    field: 'updatedAt',
+  },
+
+}, {
+  tableName: 'events',
+  freezeTableName: true,
+  timestamps: true, // 👈 Cho phép Sequelize xử lý createdAt/updatedAt nếu có
 });
 
-module.exports = { Event };
+module.exports = {
+  Event,
+};

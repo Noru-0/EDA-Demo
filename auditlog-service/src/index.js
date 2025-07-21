@@ -9,7 +9,7 @@ const start = async () => {
   try {
     await mongoose.connection;
     await auditLogged();
-    await fastify.listen({ port: 3006 });
+    await fastify.listen({ port: 3006, host: '0.0.0.0' });
     fastify.log.info('Auditlog Service running on port 3006');
   } catch (err) {
     fastify.log.error(err);

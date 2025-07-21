@@ -11,7 +11,7 @@ const start = async () => {
     await notificationSent();
     await ensureKafkaTopics();
     await registrationCreated();
-    await fastify.listen({ port: 3004 });
+    await fastify.listen({ port: 3004, host: '0.0.0.0' });
     fastify.log.info('Notification Service running on port 3004');
   } catch (err) {
     fastify.log.error(err);

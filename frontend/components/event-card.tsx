@@ -16,6 +16,7 @@ interface EventCardProps {
 export function EventCard({ event, onViewDetails, onRegister }: EventCardProps) {
   const isFullyBooked = event.registered >= event.capacity;
   const isEnded = event.status === 'ended';
+  const eventDate = new Date(event.date);
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
@@ -42,7 +43,7 @@ export function EventCard({ event, onViewDetails, onRegister }: EventCardProps) 
       <CardContent className="space-y-2">
         <div className="flex items-center text-sm text-gray-500">
           <Calendar className="h-4 w-4 mr-2" />
-          {new Date(event.date).toLocaleDateString('vi-VN', {
+          {eventDate.toLocaleDateString('vi-VN', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
@@ -64,7 +65,11 @@ export function EventCard({ event, onViewDetails, onRegister }: EventCardProps) 
         <Button variant="outline" onClick={onViewDetails} className="flex-1 bg-transparent">
           Xem chi tiết
         </Button>
-        <Button onClick={onRegister} disabled={isFullyBooked || isEnded} className="flex-1">
+        <Button
+          onClick={onRegister}
+          disabled={isFullyBooked || isEnded}
+          className="flex-1"
+        >
           {isEnded ? 'Đã kết thúc' : isFullyBooked ? 'Hết chỗ' : 'Đăng ký'}
         </Button>
       </CardFooter>

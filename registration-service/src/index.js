@@ -9,7 +9,7 @@ const start = async () => {
   try {
     await ensureKafkaTopics();             // 👈 THÊM DÒNG NÀY
     await registrationEvent();             // consumer
-    await fastify.listen({ port: 3003 });
+    await fastify.listen({ port: 3003, host: '0.0.0.0' });
     fastify.log.info('Registration Service running on port 3003');
   } catch (err) {
     fastify.log.error(err);

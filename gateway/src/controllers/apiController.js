@@ -5,9 +5,10 @@ const producer = kafkaClient.producer();
 
 module.exports = {
   getEvents: async (request, reply) => {
-    const response = await fetch('http://event-service:3002/events', {
-      headers: { Authorization: request.headers['authorization'] },
-    });
+    const response = await fetch('http://event-service:3002/events');
+    // const response = await fetch('http://event-service:3002/events', {
+    //   headers: { Authorization: request.headers['authorization'] },
+    // });
     if (!response.ok) {
       throw new Error('Failed to fetch events from event-service');
     }

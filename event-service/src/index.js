@@ -12,7 +12,7 @@ const start = async () => {
     await sequelize.sync();
     await ensureKafkaTopics();
     await eventCreated();
-    await fastify.listen({ port: 3002 });
+    await fastify.listen({ port: 3002, host: '0.0.0.0' });
     fastify.log.info('Event Service running on port 3002');
   } catch (err) {
     fastify.log.error(err);

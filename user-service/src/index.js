@@ -11,7 +11,7 @@ const start = async () => {
     await ensureKafkaTopics();
     await sequelize.sync();
     await userCreated();
-    await fastify.listen({ port: 3001 });
+    await fastify.listen({ port: 3001, host: '0.0.0.0' });
     fastify.log.info('User Service running on port 3001');
   } catch (err) {
     fastify.log.error(err);

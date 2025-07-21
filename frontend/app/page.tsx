@@ -8,7 +8,7 @@ import { FilterTabs } from '@/components/filter-tabs';
 import { LoadingSpinner } from '@/components/loading-spinner';
 import { useToast } from '@/components/ui/use-toast';
 import { Toaster } from '@/components/ui/toaster';
-import { fetchEvents, createRegistration } from '@/lib/api';
+import { fetchAllEvents, createRegistration } from '@/lib/api';
 
 export interface Event {
   id: string;
@@ -36,7 +36,7 @@ export default function HomePage() {
     const loadEvents = async () => {
       setIsLoading(true);
       try {
-        const fetchedEvents = await fetchEvents();
+        const fetchedEvents = await fetchAllEvents();
         setEvents(fetchedEvents);
         setFilteredEvents(fetchedEvents);
       } catch (error) {
@@ -107,7 +107,7 @@ export default function HomePage() {
                 key={event.id}
                 event={event}
                 onViewDetails={() => handleEventClick(event)}
-                onRegister={() => handleEventClick(event)} // Open modal for registration
+                onRegister={() => handleEventClick(event)}
               />
             ))}
           </div>
