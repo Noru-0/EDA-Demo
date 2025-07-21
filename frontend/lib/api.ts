@@ -54,7 +54,7 @@ export const createEvent = (event: {
 }) => api.post('/events', event);
 
 // ====================== REGISTRATIONS ======================
-export const createRegistration = (userId: number, eventId: number) =>
+export const createRegistration = (userId: number, eventId: string) =>
   api.post('/registrations', { userId, eventId });
 
 export const getRegistrations = () => api.get('/registrations');

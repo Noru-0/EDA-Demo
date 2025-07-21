@@ -67,7 +67,7 @@ export default function HomePage() {
 
   const handleRegistration = async (eventId: string, userId: string) => {
     try {
-      await createRegistration(Number(userId), Number(eventId));
+      await createRegistration(Number(userId), (eventId));
       toast({
         title: 'Đăng ký thành công!',
         description: 'Bạn đã đăng ký tham gia sự kiện thành công. Chúng tôi sẽ gửi email xác nhận sớm nhất.',
