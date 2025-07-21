@@ -4,6 +4,7 @@ const sequelize = require('./utils/db');
 const eventCreated = require('./events/eventCreated');
 
 fastify.post('/events', eventController.createEvent);
+fastify.get('/events', eventController.getEvents);
 
 const start = async () => {
   try {

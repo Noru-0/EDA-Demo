@@ -1,5 +1,5 @@
-const { kafkaClient } = require('../../../shared/utils/kafkaClient');
-const { EVENT_TOPICS } = require('../../../shared/event-types');
+const { kafkaClient } = require('../../shared/utils/kafkaClient');
+const { EVENT_TOPICS } = require('../../shared/event-types');
 
 const producer = kafkaClient.producer();
 

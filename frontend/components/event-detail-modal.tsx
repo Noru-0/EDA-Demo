@@ -1,25 +1,44 @@
-"use client"
+'use client';
 
-import Image from "next/image"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Calendar, MapPin, Users, Clock } from "lucide-react"
-import type { Event } from "@/app/page"
+import Image from 'next/image';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Calendar, MapPin, Users, Clock } from 'lucide-react';
+import type { Event } from '@/app/page';
+import { useState } from 'react';
+import { useToast } from '@/components/ui/use-toast';
 
 interface EventDetailModalProps {
-  event: Event | null
-  isOpen: boolean
-  onClose: () => void
-  onRegister: (eventId: string) => void
+  event: Event | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onRegister: (eventId: string, userId: string) => void;
 }
 
 export function EventDetailModal({ event, isOpen, onClose, onRegister }: EventDetailModalProps) {
-  if (!event) return null
+  const [userId, setUserId] = useState('');
+  const { toast } = useToast();
 
-  const isFullyBooked = event.registered >= event.capacity
-  const isEnded = event.status === "ended"
-  const availableSpots = event.capacity - event.registered
+  if (!event) return null;
+
+  const isFullyBooked = event.registered >= event.capacity;
+  const isEnded = event.status === 'ended';
+  const availableSpots = event.capacity - event.registered;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!userId) {
+      toast({
+        title: 'Lỗi',
+        description: 'Vui lòng nhập User ID.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    onRegister(event.id, userId);
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -31,15 +50,15 @@ export function EventDetailModal({ event, isOpen, onClose, onRegister }: EventDe
         <div className="space-y-6">
           <div className="relative">
             <Image
-              src={event.image || "/placeholder.svg"}
+              src={event.image || '/placeholder.svg'}
               alt={event.name}
               width={600}
               height={300}
               className="w-full h-64 object-cover rounded-lg"
             />
             <div className="absolute top-4 right-4">
-              <Badge variant={event.status === "upcoming" ? "default" : "secondary"}>
-                {event.status === "upcoming" ? "Sắp diễn ra" : "Đã kết thúc"}
+              <Badge variant={event.status === 'upcoming' ? 'default' : 'secondary'}>
+                {event.status === 'upcoming' ? 'Sắp diễn ra' : 'Đã kết thúc'}
               </Badge>
             </div>
           </div>
@@ -50,11 +69,11 @@ export function EventDetailModal({ event, isOpen, onClose, onRegister }: EventDe
               <div>
                 <p className="font-medium">Ngày tổ chức</p>
                 <p className="text-sm">
-                  {new Date(event.date).toLocaleDateString("vi-VN", {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
+                  {new Date(event.date).toLocaleDateString('vi-VN', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
                   })}
                 </p>
               </div>
@@ -95,23 +114,32 @@ export function EventDetailModal({ event, isOpen, onClose, onRegister }: EventDe
             <p className="text-gray-600 leading-relaxed">{event.description}</p>
           </div>
 
-          <div className="flex gap-3 pt-4 border-t">
-            <Button variant="outline" onClick={onClose} className="flex-1 bg-transparent">
-              Đóng
-            </Button>
-            <Button
-              onClick={() => {
-                onRegister(event.id)
-                onClose()
-              }}
-              disabled={isFullyBooked || isEnded}
-              className="flex-1"
-            >
-              {isEnded ? "Sự kiện đã kết thúc" : isFullyBooked ? "Hết chỗ trống" : "Đăng ký tham gia"}
-            </Button>
-          </div>
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <Input
+                type="text"
+                placeholder="Nhập User ID của bạn"
+                value={userId}
+                onChange={(e) => setUserId(e.target.value)}
+                disabled={isFullyBooked || isEnded}
+              />
+            </div>
+
+            <div className="flex gap-3 pt-4 border-t">
+              <Button type="button" variant="outline" onClick={onClose} className="flex-1 bg-transparent">
+                Đóng
+              </Button>
+              <Button
+                type="submit"
+                disabled={isFullyBooked || isEnded || !userId}
+                className="flex-1"
+              >
+                {isEnded ? 'Sự kiện đã kết thúc' : isFullyBooked ? 'Hết chỗ trống' : 'Đăng ký tham gia'}
+              </Button>
+            </div>
+          </form>
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

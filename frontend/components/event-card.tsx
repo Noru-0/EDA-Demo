@@ -1,35 +1,35 @@
-"use client"
+'use client';
 
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Calendar, MapPin, Users } from "lucide-react"
-import type { Event } from "@/app/page"
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Calendar, MapPin, Users } from 'lucide-react';
+import type { Event } from '@/app/page';
 
 interface EventCardProps {
-  event: Event
-  onViewDetails: () => void
-  onRegister: () => void
+  event: Event;
+  onViewDetails: () => void;
+  onRegister: () => void;
 }
 
 export function EventCard({ event, onViewDetails, onRegister }: EventCardProps) {
-  const isFullyBooked = event.registered >= event.capacity
-  const isEnded = event.status === "ended"
+  const isFullyBooked = event.registered >= event.capacity;
+  const isEnded = event.status === 'ended';
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
       <div className="relative">
         <Image
-          src={event.image || "/placeholder.svg"}
+          src={event.image || '/placeholder.svg'}
           alt={event.name}
           width={400}
           height={200}
           className="w-full h-48 object-cover"
         />
         <div className="absolute top-4 right-4">
-          <Badge variant={event.status === "upcoming" ? "default" : "secondary"}>
-            {event.status === "upcoming" ? "Sắp diễn ra" : "Đã kết thúc"}
+          <Badge variant={event.status === 'upcoming' ? 'default' : 'secondary'}>
+            {event.status === 'upcoming' ? 'Sắp diễn ra' : 'Đã kết thúc'}
           </Badge>
         </div>
       </div>
@@ -42,10 +42,10 @@ export function EventCard({ event, onViewDetails, onRegister }: EventCardProps) 
       <CardContent className="space-y-2">
         <div className="flex items-center text-sm text-gray-500">
           <Calendar className="h-4 w-4 mr-2" />
-          {new Date(event.date).toLocaleDateString("vi-VN", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
+          {new Date(event.date).toLocaleDateString('vi-VN', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
           })}
         </div>
 
@@ -65,9 +65,9 @@ export function EventCard({ event, onViewDetails, onRegister }: EventCardProps) 
           Xem chi tiết
         </Button>
         <Button onClick={onRegister} disabled={isFullyBooked || isEnded} className="flex-1">
-          {isEnded ? "Đã kết thúc" : isFullyBooked ? "Hết chỗ" : "Đăng ký"}
+          {isEnded ? 'Đã kết thúc' : isFullyBooked ? 'Hết chỗ' : 'Đăng ký'}
         </Button>
       </CardFooter>
     </Card>
-  )
+  );
 }

@@ -8,6 +8,7 @@ fastify.post('/notifications', notificationController.sendNotification);
 const start = async () => {
   try {
     await notificationSent();
+    await ensureKafkaTopics();
     await registrationCreated();
     await fastify.listen({ port: 3004 });
     fastify.log.info('Notification Service running on port 3004');

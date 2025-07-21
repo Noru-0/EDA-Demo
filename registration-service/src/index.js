@@ -1,14 +1,14 @@
 const fastify = require('fastify')({ logger: true });
 const registrationController = require('./controllers/registrationController');
-const sequelize = require('./utils/db');
-const registrationCreated = require('./events/registrationCreated');
+const { ensureKafkaTopics } = require('../shared/utils/kafkaInit');
+const registrationEvent = require('./events/registrationCreated');
 
-fastify.post('/registrations', registrationController.createRegistration);
+fastify.post('/registrations', registrationController.register);
 
 const start = async () => {
   try {
-    await sequelize.sync();
-    await registrationCreated();
+    await ensureKafkaTopics();             // 👈 THÊM DÒNG NÀY
+    await registrationEvent();             // consumer
     await fastify.listen({ port: 3003 });
     fastify.log.info('Registration Service running on port 3003');
   } catch (err) {
