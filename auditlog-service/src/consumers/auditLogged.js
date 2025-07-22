@@ -3,7 +3,7 @@ const { EVENT_TOPICS } = require('../../shared/event-types');
 const AuditLog = require('../models/auditLog'); // mongoose model
 
 module.exports = async () => {
-  const consumer = await createConsumer('auditlog-group');
+  const consumer = await createConsumer('audit-audit-logged');
   await consumer.subscribe({ topic: EVENT_TOPICS.AUDIT_LOGGED });
 
   await consumer.run({

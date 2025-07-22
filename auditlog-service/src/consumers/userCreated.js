@@ -5,7 +5,7 @@ const { logAudit } = require('../producers/auditLogged');
 module.exports = async () => {
   try {
     // Reuse createConsumer to ensure single connection per group
-    const consumer = await createConsumer('audit-group');
+    const consumer = await createConsumer('audit-user-created');
     
     // Subscribe to USER_CREATED topic
     await consumer.subscribe({ 

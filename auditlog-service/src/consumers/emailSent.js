@@ -4,7 +4,7 @@ const { logAudit } = require('../producers/auditLogged');
 
 module.exports = async () => {
   try {
-    const consumer = await createConsumer('audit-group');
+    const consumer = await createConsumer('audit-email-sent');
     
     await consumer.subscribe({ 
       topic: EVENT_TOPICS.EMAIL_SENT, 

@@ -20,7 +20,12 @@ const connectProducer = async () => {
 
 // Hàm tạo consumer mới với groupId tùy chỉnh
 const createConsumer = async (groupId) => {
-  const consumer = kafka.consumer({ groupId });
+  const consumer = kafka.consumer({ 
+    groupId,
+    sessionTimeout: 30000,
+    heartbeatInterval: 3000,
+    maxPollInterval: 300000,
+  });
   await consumer.connect();
   console.log(`✅ Kafka consumer [${groupId}] connected`);
   return consumer;

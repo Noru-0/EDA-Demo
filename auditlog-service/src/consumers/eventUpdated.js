@@ -4,20 +4,20 @@ const { logAudit } = require('../producers/auditLogged');
 
 module.exports = async () => {
   try {
-    const consumer = await createConsumer('audit-group');
-    
-    await consumer.subscribe({ 
-      topic: EVENT_TOPICS.UPDATE_EVENT, 
-      fromBeginning: true 
+    const consumer = await createConsumer('audit-event-updated');
+
+    await consumer.subscribe({
+      topic: EVENT_TOPICS.EVENT_UPDATED,
+      fromBeginning: true
     });
-    console.log(`✅ Subscribed to topic: ${EVENT_TOPICS.UPDATE_EVENT}`);
+    console.log(`✅ Subscribed to topic: ${EVENT_TOPICS.EVENT_UPDATED}`);
 
     await consumer.run({
       eachMessage: async ({ topic, partition, message }) => {
         try {
           const data = JSON.parse(message.value?.toString() || '{}');
           const { eventId, updatedFields, updatedBy } = data;
-          console.log(`📥 Received ${EVENT_TOPICS.UPDATE_EVENT} for audit:`, data);
+          console.log(`📥 Received ${EVENT_TOPICS.EVENT_UPDATED} for audit:`, data);
 
           if (!eventId) {
             console.warn('⚠️ Missing eventId in message:', data);
@@ -25,10 +25,10 @@ module.exports = async () => {
           }
 
           await logAudit({
-            eventType: EVENT_TOPICS.UPDATE_EVENT,
+            eventType: EVENT_TOPICS.EVENT_UPDATED,
             data: { eventId, updatedFields, updatedBy, timestamp: data.timestamp || new Date().toISOString() },
           });
-          console.log(`✅ Audit log created for ${EVENT_TOPICS.UPDATE_EVENT}`);
+          console.log(`✅ Audit log created for ${EVENT_TOPICS.EVENT_UPDATED}`);
 
         } catch (error) {
           console.error(`❌ Error processing message from topic ${topic} partition ${partition}:`, error);
@@ -40,9 +40,9 @@ module.exports = async () => {
       console.error('❌ Consumer crashed:', payload.error);
     });
 
-    console.log(`🚀 Consumer for ${EVENT_TOPICS.UPDATE_EVENT} started`);
+    console.log(`🚀 Consumer for ${EVENT_TOPICS.EVENT_UPDATED} started`);
   } catch (error) {
-    console.error('❌ Failed to start UPDATE_EVENT audit consumer:', error);
+    console.error('❌ Failed to start EVENT_UPDATED audit consumer:', error);
     throw error;
   }
 };

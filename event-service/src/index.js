@@ -2,7 +2,7 @@ const fastify = require('fastify')({ logger: true });
 const eventController = require('./controllers/eventController');
 const sequelize = require('./utils/db');
 const { ensureKafkaTopics } = require('../shared/utils/kafkaInit');
-const consumeRegistrationCreated = require('./consumers/registration/createdConsumer');
+const consumeRegistrationCreated = require('./consumers/createdConsumer');
 
 fastify.post('/events', eventController.createEvent);
 fastify.get('/events', eventController.getEvents);
