@@ -25,4 +25,36 @@ module.exports = {
     await producer.disconnect();
     reply.code(201).send({ message: 'Registration request sent' });
   },
+  createUser: async (request, reply) => {
+    const { username, email, password } = request.body;
+
+    const response = await fetch('http://user-service:3001/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, email, password })
+    });
+
+    if (!response.ok) {
+      return reply.code(500).send({ error: 'Failed to create user via user-service' });
+    }
+
+    const data = await response.json();
+    reply.code(201).send(data);
+  },
+  loginUser: async (request, reply) => {
+    const { email, password } = request.body;
+
+    const response = await fetch('http://user-service:3001/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+
+    if (!response.ok) {
+      return reply.code(401).send({ error: 'Invalid email or password' });
+    }
+
+    const data = await response.json();
+    reply.code(200).send(data);
+  },
 };

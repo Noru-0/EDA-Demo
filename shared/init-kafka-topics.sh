@@ -3,13 +3,29 @@ set -e
 
 echo "🛠 Creating Kafka topics..."
 
-kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists \
-  --topic registration_created --replication-factor 1 --partitions 1
+TOPICS=(
+  user.created
+  user.updated
+  user.logged_in
+  event.created
+  event.updated
+  registration.created
+  registration.cancelled
+  notification.sent
+  notification.failed
+  email.sent
+  email.failed
+  audit.logged
+  audit.failed
+)
 
-kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists \
-  --topic notification_sent --replication-factor 1 --partitions 1
+for topic in "${TOPICS[@]}"; do
+  echo "➡️ Creating topic: $topic"
+  kafka-topics --bootstrap-server kafka:9092 \
+    --create --if-not-exists \
+    --topic "$topic" \
+    --replication-factor 1 \
+    --partitions 1
+done
 
-kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists \
-  --topic email_sent --replication-factor 1 --partitions 1
-
-echo "✅ Kafka topics created."
+echo "✅ All Kafka topics created successfully."

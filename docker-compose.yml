@@ -12,7 +12,8 @@ services:
       - KAFKA_BROKERS=kafka:9092
       - KAFKAJS_NO_PARTITIONER_WARNING=1
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     restart: on-failure
     networks:
       - eventflow-network
@@ -30,8 +31,10 @@ services:
       - KAFKAJS_NO_PARTITIONER_WARNING=1
     entrypoint: ["sh", "-c", "./shared/wait-for-postgres.sh && ./shared/wait-for-kafka.sh && node src/index.js"]
     depends_on:
-      - postgres
-      - kafka
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
     restart: on-failure
     networks:
       - eventflow-network
@@ -49,8 +52,10 @@ services:
       - KAFKAJS_NO_PARTITIONER_WARNING=1
     entrypoint: ["sh", "-c", "./shared/wait-for-postgres.sh && ./shared/wait-for-kafka.sh && node src/index.js"]
     depends_on:
-      - postgres
-      - kafka
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
     restart: on-failure
     networks:
       - eventflow-network
@@ -68,8 +73,10 @@ services:
       - KAFKAJS_NO_PARTITIONER_WARNING=1
     entrypoint: ["sh", "-c", "./shared/wait-for-postgres.sh && ./shared/wait-for-kafka.sh && node src/index.js"]
     depends_on:
-      - postgres
-      - kafka
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
     restart: on-failure
     networks:
       - eventflow-network
@@ -86,24 +93,8 @@ services:
       - KAFKAJS_NO_PARTITIONER_WARNING=1
     entrypoint: ["sh", "-c", "./shared/wait-for-kafka.sh && node src/index.js"]
     depends_on:
-      - kafka
-    restart: on-failure
-    networks:
-      - eventflow-network
-
-  email-service:
-    build: ./email-service
-    volumes:
-      - ./shared:/app/shared
-    ports:
-      - "3005:3005"
-    environment:
-      - NODE_ENV=production
-      - KAFKA_BROKERS=kafka:9092
-      - KAFKAJS_NO_PARTITIONER_WARNING=1
-    entrypoint: ["sh", "-c", "./shared/wait-for-kafka.sh && node src/index.js"]
-    depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     restart: on-failure
     networks:
       - eventflow-network
@@ -121,8 +112,10 @@ services:
       - KAFKAJS_NO_PARTITIONER_WARNING=1
     entrypoint: ["sh", "-c", "./shared/wait-for-mongo.sh && ./shared/wait-for-kafka.sh && node src/index.js"]
     depends_on:
-      - kafka
-      - mongo
+      kafka:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
     restart: on-failure
     networks:
       - eventflow-network
@@ -130,7 +123,7 @@ services:
   postgres:
     image: postgres:15
     ports:
-    - "5432:5432"
+      - "5432:5432"
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=admin
@@ -149,11 +142,16 @@ services:
   mongo:
     image: mongo:6
     ports:
-    - "27017:27017"
+      - "27017:27017"
     volumes:
       - mongo-data:/data/db
     networks:
       - eventflow-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.3.0
@@ -170,6 +168,7 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_CREATE_TOPICS_ENABLE: 'true'
@@ -180,7 +179,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-    
+
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     ports:
@@ -188,8 +187,10 @@ services:
     environment:
       - KAFKA_CLUSTERS_0_NAME=local
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+      - KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL=PLAINTEXT
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     networks:
       - eventflow-network
 
@@ -200,7 +201,7 @@ services:
         condition: service_healthy
     volumes:
       - ./shared/init-kafka-topics.sh:/init-kafka.sh
-    entrypoint: [ "bash", "/init-kafka.sh" ]
+    entrypoint: ["bash", "/init-kafka.sh"]
     networks:
       - eventflow-network
 

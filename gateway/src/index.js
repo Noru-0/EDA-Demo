@@ -1,10 +1,15 @@
 const fastify = require('fastify')({ logger: true });
 const config = require('./config/config');
-
-fastify.register(require('./routes'));
+const cors = require('@fastify/cors');
 
 const start = async () => {
   try {
+    await fastify.register(cors, {
+      origin: '*', // Cho phép tất cả các nguồn
+    });
+
+    fastify.register(require('./routes'));
+
     await fastify.listen({ port: config.port, host: '0.0.0.0' });
     fastify.log.info(`Gateway running on port ${config.port}`);
   } catch (err) {
@@ -12,4 +17,5 @@ const start = async () => {
     process.exit(1);
   }
 };
-start();
+
+start(); // 👈 bắt đầu server

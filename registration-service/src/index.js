@@ -1,7 +1,7 @@
 const fastify = require('fastify')({ logger: true });
 const registrationController = require('./controllers/registrationController');
 const { ensureKafkaTopics } = require('../shared/utils/kafkaInit');
-const registrationEvent = require('./events/registrationCreated');
+const registrationEvent = require('./producers/registrationCreated');
 
 fastify.post('/registrations', registrationController.createRegistration);
 

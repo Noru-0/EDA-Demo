@@ -1,19 +1,37 @@
 const userService = require('../services/userService');
-const { kafkaClient } = require('../../shared/utils/kafkaClient');
-const { EVENT_TOPICS } = require('../../shared/event-types');
-
-const producer = kafkaClient.producer();
 
 module.exports = {
   createUser: async (request, reply) => {
-    const { name, email } = request.body;
-    const user = await userService.createUser({ name, email });
-    await producer.connect();
-    await producer.send({
-      topic: EVENT_TOPICS.USER_CREATED,
-      messages: [{ value: JSON.stringify(user) }],
-    });
-    await producer.disconnect();
-    reply.code(201).send(user);
+    try {
+      request.log.info('🔍 createUser controller called with body:', request.body);
+      const { username, email, password, phone, deviceToken } = request.body;
+
+      if (!username || !email || !password) {
+        return reply.code(400).send({ error: 'Missing required fields: username, email, password' });
+      }
+
+      const user = await userService.createUser({ username, email, password, phone, deviceToken });
+      reply.code(201).send(user);
+    } catch (error) {
+      request.log.error('❌ Error in createUser controller:', error);
+      if (error.name === 'SequelizeValidationError') {
+        return reply.code(400).send({ error: error.errors.map(e => e.message) });
+      }
+      reply.code(500).send({ error: error.message });
+    }
+  },
+
+  loginUser: async (request, reply) => {
+    try {
+      const { email, password } = request.body;
+      if (!email || !password) {
+        return reply.code(400).send({ error: 'Missing email or password' });
+      }
+
+      const user = await userService.authenticateUser(email, password);
+      reply.code(200).send({ message: 'Login successful', user });
+    } catch (error) {
+      reply.code(401).send({ error: error.message });
+    }
   },
 };

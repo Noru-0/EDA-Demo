@@ -45,16 +45,16 @@ const Event = sequelize.define('Event', {
     defaultValue: 'upcoming',
   },
 
-  createdAt: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    field: 'createdAt', // Phải match đúng tên SQL column
-  },
-  updatedAt: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    field: 'updatedAt',
-  },
+  // createdAt: {
+  //   type: DataTypes.DATE,
+  //   allowNull: false,
+  //   field: 'createdAt', // Phải match đúng tên SQL column
+  // },
+  // updatedAt: {
+  //   type: DataTypes.DATE,
+  //   allowNull: false,
+  //   field: 'updatedAt',
+  // },
 
 }, {
   tableName: 'events',

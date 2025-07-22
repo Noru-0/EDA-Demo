@@ -1,5 +1,3 @@
-// api/lib.ts
-
 import axios from 'axios';
 
 const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://localhost:3007';
@@ -11,23 +9,19 @@ const api = axios.create({
   },
 });
 
-// Optionally: Add auth token if needed
-// api.interceptors.request.use((config) => {
-//   const token = localStorage.getItem('token');
-//   if (token) config.headers.Authorization = `Bearer ${token}`;
-//   return config;
-// });
-
 // ====================== AUTH ======================
-export const login = (email: string, password: string) =>
-  api.post('/auth/login', { email, password });
+export const registerUser = async (username: string, email: string, password: string) => {
+  const res = await api.post('/users', { username, email, password });
+  return res.data;
+};
 
-export const registerUser = (name: string, email: string) =>
-  api.post('/users', { name, email });
+export const login = async (email: string, password: string) => {
+  const res = await api.post('/auth/login', { email, password });
+  return res.data;
+};
 
 // ====================== USERS ======================
 export const getUsers = () => api.get('/users');
-
 export const getUserById = (id: number) => api.get(`/users/${id}`);
 
 // ====================== EVENTS ======================
@@ -37,7 +31,6 @@ export const getEvents = async () => {
 };
 
 export const fetchEvents = (eventId: number) => api.get(`/events/${eventId}`);
-
 export const fetchAllEvents = async () => {
   const res = await api.get('/events');
   return res.data;
@@ -67,10 +60,10 @@ export const sendNotification = (userId: number, message: string) =>
 export const sendEmail = (userId: number, subject: string, body: string) =>
   api.post('/emails', { userId, subject, body });
 
-// ====================== AUDIT LOGS (if applicable) ======================
+// ====================== AUDIT LOGS ======================
 export const getAuditLogs = () => api.get('/auditlogs');
 
-// ====================== HEALTH CHECK (optional) ======================
+// ====================== HEALTH CHECK ======================
 export const healthCheck = () => api.get('/health');
 
 export default api;

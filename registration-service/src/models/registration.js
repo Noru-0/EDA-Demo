@@ -7,14 +7,18 @@ const Registration = sequelize.define('Registration', {
     primaryKey: true,
     autoIncrement: true,
   },
-  userId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
   eventId: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  userEmail: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  }
 });
 
 module.exports = { Registration };

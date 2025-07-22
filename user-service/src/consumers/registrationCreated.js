@@ -1,10 +1,9 @@
+console.log('🚀 Notification consumer is starting...');
+
 const { createConsumer, kafkaProducer, connectProducer } = require('../../shared/utils/kafkaClient');
 const { EVENT_TOPICS } = require('../../shared/event-types');
 const nodemailer = require('nodemailer');
 
-console.log('🚀 Notification consumer is starting...');
-
-// ✅ Cấu hình gửi email bằng SMTP
 const emailTransport = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
   port: 587,
@@ -18,8 +17,8 @@ const emailTransport = nodemailer.createTransport({
 module.exports = async () => {
   try {
     await connectProducer();
-
     const consumer = await createConsumer('notification-group');
+
     await consumer.subscribe({
       topic: EVENT_TOPICS.REGISTRATION_CREATED,
       fromBeginning: true,
@@ -28,23 +27,20 @@ module.exports = async () => {
     console.log(`✅ Subscribed to topic: ${EVENT_TOPICS.REGISTRATION_CREATED}`);
 
     await consumer.run({
-      eachMessage: async ({ message }) => {
+      eachMessage: async ({ topic, message }) => {
+        console.log('🔥 Message received:', message.value?.toString());
+
         try {
-          const raw = message.value?.toString() || '{}';
-          const { eventId, userId, userEmail } = JSON.parse(raw);
-
-          if (!eventId || !userId) {
-            console.warn('⚠️ Missing required fields in message:', raw);
-            return;
-          }
-
+          const data = JSON.parse(message.value?.toString() || '{}');
+          const { eventId, userId, userEmail } = data;
           const toEmail = userEmail || process.env.DEFAULT_NOTIFICATION_EMAIL;
-          if (!toEmail) {
-            console.warn('⚠️ Cannot send email: No userEmail or DEFAULT_NOTIFICATION_EMAIL provided.');
+
+          if (!eventId || !userId || !toEmail) {
+            console.warn('⚠️ Missing required fields: eventId, userId, toEmail');
             return;
           }
 
-          // ✅ Gửi email xác nhận
+          // ✅ Send confirmation email
           await emailTransport.sendMail({
             from: `"EDA Demo" <${process.env.SMTP_USER}>`,
             to: toEmail,
@@ -52,21 +48,41 @@ module.exports = async () => {
             text: `You have successfully registered for event ${eventId}!`,
             html: `<p>You have successfully registered for event <strong>${eventId}</strong>!</p>`,
           });
+
           console.log(`✅ Email sent to ${toEmail}`);
 
-          // ✅ Gửi sự kiện audit qua Kafka
-          const auditEvent = {
-            eventType: EVENT_TOPICS.REGISTRATION_CREATED,
-            data: { eventId, userId, userEmail: toEmail, timestamp: new Date().toISOString() },
-          };
-
+          // 📤 Send audit.logged event
           await kafkaProducer.send({
             topic: EVENT_TOPICS.AUDIT_LOGGED,
-            messages: [{ value: JSON.stringify(auditEvent) }],
+            messages: [
+              {
+                value: JSON.stringify({
+                  eventType: EVENT_TOPICS.REGISTRATION_CREATED,
+                  data: { eventId, userId, userEmail: toEmail, timestamp: new Date().toISOString() },
+                }),
+              },
+            ],
           });
-          console.log(`📤 Sent audit log to topic ${EVENT_TOPICS.AUDIT_LOGGED}`);
+
+          console.log(`📤 Audit log event sent to ${EVENT_TOPICS.AUDIT_LOGGED}`);
         } catch (error) {
-          console.error(`❌ Error processing registration event:`, error);
+          console.error(`❌ Error processing message:`, error);
+
+          // 📤 Send notification.failed event
+          await kafkaProducer.send({
+            topic: EVENT_TOPICS.NOTIFICATION_FAILED,
+            messages: [
+              {
+                value: JSON.stringify({
+                  originalEvent: EVENT_TOPICS.REGISTRATION_CREATED,
+                  error: error.message,
+                  timestamp: new Date().toISOString(),
+                }),
+              },
+            ],
+          });
+
+          console.warn(`⚠️ Sent ${EVENT_TOPICS.NOTIFICATION_FAILED} event`);
         }
       },
     });

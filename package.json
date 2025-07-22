@@ -5,6 +5,16 @@
     "start": "docker-compose up --build",
     "test": "echo 'Run tests in each service'"
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "dependencies": {
+    "kafkajs": "^2.2.4"
+  },
+  "workspaces": [
+    "auditlog-service",
+    "email-service",
+    "event-service",
+    "gateway",
+    "notification-service",
+    "registration-service",
+    "user-service"
+  ]
 }
