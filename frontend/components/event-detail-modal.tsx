@@ -3,7 +3,6 @@
 import Image from 'next/image';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, MapPin, Users, Clock } from 'lucide-react';
 import { useState } from 'react';
@@ -18,8 +17,21 @@ interface EventDetailModalProps {
 }
 
 export function EventDetailModal({ event, isOpen, onClose, onRegister }: EventDetailModalProps) {
-  const [userId, setUserId] = useState('');
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // ✅ Lấy userId đúng từ localStorage
+  const userId =
+    typeof window !== 'undefined'
+      ? (() => {
+          try {
+            const stored = localStorage.getItem('user');
+            return stored ? JSON.parse(stored).userId : null;
+          } catch {
+            return null;
+          }
+        })()
+      : null;
 
   if (!event) return null;
 
@@ -37,18 +49,34 @@ export function EventDetailModal({ event, isOpen, onClose, onRegister }: EventDe
   const statusLabel = event.status === 'upcoming' ? 'Sắp diễn ra' : 'Đã kết thúc';
   const badgeVariant = event.status === 'upcoming' ? 'default' : 'secondary';
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userId) {
       toast({
         title: 'Lỗi',
-        description: 'Vui lòng nhập User ID.',
+        description: 'Vui lòng đăng nhập để đăng ký sự kiện.',
         variant: 'destructive',
       });
       return;
     }
-    onRegister(event.id, userId);
-    setUserId(''); // Reset sau khi đăng ký
+
+    setIsSubmitting(true);
+    try {
+      await onRegister(event.id, userId);
+      toast({
+        title: 'Thành công',
+        description: 'Đăng ký sự kiện thành công!',
+      });
+      onClose();
+    } catch (error) {
+      toast({
+        title: 'Lỗi',
+        description: 'Đăng ký sự kiện thất bại. Vui lòng thử lại.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -96,22 +124,18 @@ export function EventDetailModal({ event, isOpen, onClose, onRegister }: EventDe
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <Input
-                type="text"
-                placeholder="Nhập User ID của bạn"
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
-                disabled={isFullyBooked || isEnded}
-              />
-            </div>
-
             <div className="flex gap-3 pt-4 border-t">
               <Button type="button" variant="outline" onClick={onClose} className="flex-1 bg-transparent">
                 Đóng
               </Button>
-              <Button type="submit" disabled={isDisabled} className="flex-1">
-                {isEnded ? 'Sự kiện đã kết thúc' : isFullyBooked ? 'Hết chỗ trống' : 'Đăng ký tham gia'}
+              <Button type="submit" disabled={isDisabled || isSubmitting} className="flex-1">
+                {isEnded
+                  ? 'Sự kiện đã kết thúc'
+                  : isFullyBooked
+                  ? 'Hết chỗ trống'
+                  : isSubmitting
+                  ? 'Đang đăng ký...'
+                  : 'Đăng ký tham gia'}
               </Button>
             </div>
           </form>

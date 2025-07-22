@@ -272,6 +272,16 @@ notification-service	EMAIL_SENT (email.sent), EMAIL_FAILED (email.failed)	USER_C
 audit-service	AUDIT_LOGGED (AUDIT_LOGGED), AUDIT_FAILED (AUDIT_FAILED)	USER_CREATED, REGISTRATION_CREATED, EVENT_CREATED, UPDATE_EVENT, EMAIL_SENT, EMAIL_FAILED, AUDIT_FAILED
 ---
 
+# Tắt toàn bộ
+docker compose down -v
+
+# Dọn network (tuỳ chọn nếu vẫn lỗi)
+docker network prune
+docker network rm <network_name>
+
+# Bật lại
+docker compose up -d --build
+
 ```
 EDA-Demo
 ├─ auditlog-service

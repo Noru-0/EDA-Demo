@@ -117,12 +117,3 @@ Luồng đăng ký sự kiện được thiết kế theo **EDA** giúp:
 - Cho phép logging và xử lý backend linh hoạt
 - Mở rộng hệ thống bằng việc thêm consumer hoặc topic mới
 
-# Tắt toàn bộ
-docker compose down -v
-
-# Dọn network (tuỳ chọn nếu vẫn lỗi)
-docker network prune
-docker network rm <network_name>
-
-# Bật lại
-docker compose up -d --build

@@ -60,16 +60,16 @@ export function Header() {
 
   const handleLogin = async () => {
     try {
-      const { userId, username } = await login(email, password);
-      localStorage.setItem('user', JSON.stringify({ userId, username }));
+      const { user } = await login(email, password); // user có user.id và user.username
+      localStorage.setItem('user', JSON.stringify({ userId: user.id, username: user.username }));
       setIsLoggedIn(true);
-      setUsername(username);
+      setUsername(user.username);
       setIsLoginModalOpen(false);
       setEmail('');
       setPassword('');
       toast({
         title: 'Đăng nhập thành công',
-        description: `Chào mừng ${username}!`,
+        description: `Chào mừng ${user.username}!`,
       });
     } catch (error) {
       toast({

@@ -17,8 +17,24 @@ export const registerUser = async (username: string, email: string, password: st
 
 export const login = async (email: string, password: string) => {
   const res = await api.post('/auth/login', { email, password });
+
+  const user = res.data.user;
+  if (user && user.id && user.username) {
+    localStorage.setItem('user', JSON.stringify({
+      userId: user.id,
+      username: user.username
+    }));
+    console.log('✅ user saved to localStorage:', {
+      userId: user.id,
+      username: user.username
+    });
+  } else {
+    console.warn('❌ Invalid user object in login response:', user);
+  }
+
   return res.data;
 };
+
 
 // ====================== USERS ======================
 export const getUsers = () => api.get('/users');
