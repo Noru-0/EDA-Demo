@@ -5,9 +5,9 @@ const auditLogged = require('./producers/auditLogged');
 const userCreatedAuditConsumer = require('./consumers/userCreated');
 const registrationCreatedAuditConsumer = require('./consumers/registrationCreated');
 const updateEventAuditConsumer = require('./consumers/eventUpdated');
-const emailSentAuditConsumer = require('./consumers/emailSent');
 const consumeAuditLogged = require('./consumers/auditLogged');
 const userLoggedInAuditConsumer = require('./consumers/userLogined');
+const notificationSentAuditConsumer = require('./consumers/emailSent');
 
 const start = async () => {
   try {
@@ -29,9 +29,9 @@ const start = async () => {
       { name: 'USER_CREATED', consumer: userCreatedAuditConsumer },
       { name: 'REGISTRATION_CREATED', consumer: registrationCreatedAuditConsumer },
       { name: 'UPDATE_EVENT', consumer: updateEventAuditConsumer },
-      { name: 'EMAIL_SENT', consumer: emailSentAuditConsumer },
       { name: 'AUDIT_LOGGED', consumer: consumeAuditLogged },
       { name: 'USER_LOGGED_IN', consumer: userLoggedInAuditConsumer },
+      { name: 'NOTIFICATION_SENT', consumer: notificationSentAuditConsumer }
     ];
 
     for (const { name, consumer } of consumers) {

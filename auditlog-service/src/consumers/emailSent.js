@@ -7,17 +7,18 @@ module.exports = async () => {
     const consumer = await createConsumer('audit-email-sent');
     
     await consumer.subscribe({ 
-      topic: EVENT_TOPICS.EMAIL_SENT, 
+      topic: EVENT_TOPICS.NOTIFICATION_SENT, 
       fromBeginning: true 
     });
-    console.log(`✅ Subscribed to topic: ${EVENT_TOPICS.EMAIL_SENT}`);
+    console.log(`✅ Subscribed to topic: ${EVENT_TOPICS.NOTIFICATION_SENT}`);
 
     await consumer.run({
       eachMessage: async ({ topic, partition, message }) => {
         try {
           const data = JSON.parse(message.value?.toString() || '{}');
           const { userId, email, subject } = data;
-          console.log(`📥 Received ${EVENT_TOPICS.EMAIL_SENT} for audit:`, data);
+
+          console.log(`📥 Received ${EVENT_TOPICS.NOTIFICATION_SENT} for audit:`, data);
 
           if (!userId || !email) {
             console.warn('⚠️ Missing userId or email in message:', data);
@@ -25,11 +26,16 @@ module.exports = async () => {
           }
 
           await logAudit({
-            eventType: EVENT_TOPICS.EMAIL_SENT,
-            data: { userId, email, subject, timestamp: data.timestamp || new Date().toISOString() },
+            eventType: EVENT_TOPICS.NOTIFICATION_SENT,
+            data: {
+              userId,
+              email,
+              subject,
+              timestamp: data.timestamp || new Date().toISOString(),
+            },
           });
-          console.log(`✅ Audit log created for ${EVENT_TOPICS.EMAIL_SENT}`);
 
+          console.log(`✅ Audit log created for ${EVENT_TOPICS.NOTIFICATION_SENT}`);
         } catch (error) {
           console.error(`❌ Error processing message from topic ${topic} partition ${partition}:`, error);
         }
@@ -40,9 +46,9 @@ module.exports = async () => {
       console.error('❌ Consumer crashed:', payload.error);
     });
 
-    console.log(`🚀 Consumer for ${EVENT_TOPICS.EMAIL_SENT} started`);
+    console.log(`🚀 Consumer for ${EVENT_TOPICS.NOTIFICATION_SENT} started`);
   } catch (error) {
-    console.error('❌ Failed to start EMAIL_SENT audit consumer:', error);
+    console.error('❌ Failed to start NOTIFICATION_SENT audit consumer:', error);
     throw error;
   }
 };

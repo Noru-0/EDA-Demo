@@ -185,6 +185,42 @@ npm run dev
 
 ---
 
+## 📦 Thông Tin Kafka Topics & Consumer Groups
+
+### 🎯 **Danh sách Topics đang sử dụng**
+
+| Topic Name              | Ý nghĩa |
+|-------------------------|---------|
+| `user.created`          | Phát khi người dùng mới được tạo |
+| `user.logged_in`        | Phát khi người dùng đăng nhập thành công |
+| `user.updated`          | (Dự phòng) Phát khi thông tin user được cập nhật |
+| `event.created`         | (Dự phòng) Phát khi có event mới |
+| `event.updated`         | Phát khi event được cập nhật |
+| `registration.created`  | Phát khi có người đăng ký sự kiện |
+| `registration.cancelled`| (Dự phòng) Phát khi người dùng hủy đăng ký |
+| `notification.sent`     | Ghi nhận đã gửi notification (email) |
+| `notification.failed`   | (Dự phòng) Ghi nhận lỗi khi gửi notification |
+| `audit.logged`          | Ghi nhận các hành vi thành công |
+| `audit.failed`          | (Dự phòng) Ghi nhận hành vi thất bại |
+| `__consumer_offsets`    | (Hệ thống) Kafka sử dụng để theo dõi offset các consumer group |
+
+### 👥 **Danh sách Consumer Groups tiêu biểu**
+
+| Consumer Group         | Mô tả |
+|------------------------|------|
+| `audit-user-created`   | Ghi log sự kiện tạo user |
+| `audit-user-logged`    | Ghi log hành vi đăng nhập |
+| `audit-registration-created` | Ghi log hành vi đăng ký sự kiện |
+| `audit-event-updated`  | Ghi log khi event cập nhật |
+| `notification-group`   | Lắng nghe REGISTRATION_CREATED để gửi email |
+| `event-group`          | Lắng nghe REGISTRATION_CREATED để cập nhật sự kiện |
+| `audit-audit-logged`   | Lưu trữ toàn bộ log gửi qua topic `audit.logged` |
+| `audit-email-sent`     | Ghi log việc gửi email thành công |
+
+> ℹ️ Các group như `audit-*` có thể gom vào 1 group lớn nếu không cần tách biệt chi tiết.
+
+---
+
 ## ✅ Tổng Kết
 
 Hệ thống minh họa rõ:

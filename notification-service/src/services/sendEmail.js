@@ -22,5 +22,3 @@ async function sendMail(to, subject, text) {
   }
 }
 
-// Demo call
-sendMail('ipm184184@gmail.com', 'Registration Success', 'You have registered successfully!');

@@ -9,8 +9,6 @@ module.exports = {
     REGISTRATION_CANCELLED: 'registration.cancelled',
     NOTIFICATION_SENT: 'notification.sent',
     NOTIFICATION_FAILED: 'notification.failed',
-    EMAIL_SENT: 'email.sent',
-    EMAIL_FAILED: 'email.failed',
     AUDIT_LOGGED: 'audit.logged',
     AUDIT_FAILED: 'audit.failed',
   },

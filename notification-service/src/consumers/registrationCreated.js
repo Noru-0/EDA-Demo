@@ -1,10 +1,12 @@
-const { createConsumer, kafkaProducer, connectProducer } = require('../../shared/utils/kafkaClient');
+const { createConsumer } = require('../../shared/utils/kafkaClient');
 const { EVENT_TOPICS } = require('../../shared/event-types');
+const { sendEmailSentEvent } = require('../producers/notificationSent');
+const { sendEmailFailedEvent } = require('../producers/notificationFailed'); // 👈 Thêm
 const nodemailer = require('nodemailer');
 
 console.log('🚀 Notification consumer is starting...');
 
-// ✅ Cấu hình gửi email bằng SMTP
+// ✅ SMTP config
 const emailTransport = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
   port: 587,
@@ -17,8 +19,6 @@ const emailTransport = nodemailer.createTransport({
 
 module.exports = async () => {
   try {
-    await connectProducer();
-
     const consumer = await createConsumer('notification-group');
     await consumer.subscribe({
       topic: EVENT_TOPICS.REGISTRATION_CREATED,
@@ -29,22 +29,26 @@ module.exports = async () => {
 
     await consumer.run({
       eachMessage: async ({ message }) => {
+        const raw = message.value?.toString() || '{}';
+        let parsed;
+
         try {
-          const raw = message.value?.toString() || '{}';
-          const { eventId, userId, userEmail } = JSON.parse(raw);
+          parsed = JSON.parse(raw);
+        } catch (err) {
+          console.error('❌ Failed to parse message:', raw);
+          return;
+        }
 
-          if (!eventId || !userId) {
-            console.warn('⚠️ Missing required fields in message:', raw);
-            return;
-          }
+        const { eventId, userId, userEmail } = parsed;
+        const toEmail = userEmail || process.env.DEFAULT_NOTIFICATION_EMAIL;
 
-          const toEmail = userEmail || process.env.DEFAULT_NOTIFICATION_EMAIL;
-          if (!toEmail) {
-            console.warn('⚠️ Cannot send email: No userEmail or DEFAULT_NOTIFICATION_EMAIL provided.');
-            return;
-          }
+        if (!eventId || !userId || !toEmail) {
+          console.warn('⚠️ Missing required fields in message:', parsed);
+          return;
+        }
 
-          // ✅ Gửi email xác nhận
+        try {
+          // ✅ Gửi email
           await emailTransport.sendMail({
             from: `"EDA Demo" <${process.env.SMTP_USER}>`,
             to: toEmail,
@@ -52,28 +56,21 @@ module.exports = async () => {
             text: `You have successfully registered for event ${eventId}!`,
             html: `<p>You have successfully registered for event <strong>${eventId}</strong>!</p>`,
           });
+
           console.log(`✅ Email sent to ${toEmail}`);
 
-          // ✅ Gửi sự kiện audit qua Kafka
-          const auditEvent = {
-            eventType: EVENT_TOPICS.REGISTRATION_CREATED,
-            data: { eventId, userId, userEmail: toEmail, timestamp: new Date().toISOString() },
-          };
-
-          await kafkaProducer.send({
-            topic: EVENT_TOPICS.AUDIT_LOGGED,
-            messages: [{ value: JSON.stringify(auditEvent) }],
+          await sendEmailSentEvent({
+            userId,
+            email: toEmail,
+            subject: 'Event Registration Confirmation',
           });
-          console.log(`📤 Sent audit log to topic ${EVENT_TOPICS.AUDIT_LOGGED}`);
+
         } catch (error) {
-          console.error(`❌ Error processing registration event:`, error);
+          console.error(`❌ Failed to send email to ${toEmail}:`, error);
         }
       },
     });
-
-    console.log(`🚀 Email Notification Consumer started`);
   } catch (err) {
     console.error('❌ Failed to start notification consumer:', err);
-    throw err;
   }
 };

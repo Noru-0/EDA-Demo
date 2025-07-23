@@ -8,15 +8,18 @@ module.exports = async () => {
 
     await consumer.subscribe({
       topic: EVENT_TOPICS.EVENT_UPDATED,
-      fromBeginning: true
+      fromBeginning: true,
     });
+
     console.log(`✅ Subscribed to topic: ${EVENT_TOPICS.EVENT_UPDATED}`);
 
     await consumer.run({
       eachMessage: async ({ topic, partition, message }) => {
         try {
-          const data = JSON.parse(message.value?.toString() || '{}');
-          const { eventId, updatedFields, updatedBy } = data;
+          const raw = message.value?.toString() || '{}';
+          const data = JSON.parse(raw);
+          const { eventId, updatedFields, updatedBy, timestamp } = data;
+
           console.log(`📥 Received ${EVENT_TOPICS.EVENT_UPDATED} for audit:`, data);
 
           if (!eventId) {
@@ -26,10 +29,15 @@ module.exports = async () => {
 
           await logAudit({
             eventType: EVENT_TOPICS.EVENT_UPDATED,
-            data: { eventId, updatedFields, updatedBy, timestamp: data.timestamp || new Date().toISOString() },
+            data: {
+              eventId,
+              updatedFields,
+              updatedBy,
+              timestamp: data.timestamp || new Date().toISOString(),
+            },
           });
-          console.log(`✅ Audit log created for ${EVENT_TOPICS.EVENT_UPDATED}`);
 
+          console.log(`✅ Audit log created for ${EVENT_TOPICS.EVENT_UPDATED}`);
         } catch (error) {
           console.error(`❌ Error processing message from topic ${topic} partition ${partition}:`, error);
         }

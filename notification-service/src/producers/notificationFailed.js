@@ -1,37 +1,23 @@
-const { kafkaClient, createConsumer } = require('../../shared/utils/kafkaClient');
+const { connectProducer, kafkaProducer } = require('../../shared/utils/kafkaClient');
 const { EVENT_TOPICS } = require('../../shared/event-types');
 
-module.exports = async () => {
-  try {
-    // Reuse createConsumer to ensure single connection per group
-    const consumer = await createConsumer('notification-group');
-    
-    // Subscribe to topic with fromBeginning: true for processing all messages
-    await consumer.subscribe({ 
-      topic: EVENT_TOPICS.NOTIFICATION_FAILED, 
-      fromBeginning: true 
-    });
+async function sendEmailFailedEvent({ userId, email, error, eventId }) {
+  await connectProducer();
 
-    // Process messages with error handling
-    await consumer.run({
-      eachMessage: async ({ topic, partition, message }) => {
-        try {
-          const messageValue = message.value?.toString();
-          console.log(`Notification Failed: ${messageValue}`);
-        } catch (error) {
-          console.error(`Error processing message from topic ${topic} partition ${partition}:`, error);
-        }
-      },
-    });
+  const payload = {
+    userId,
+    email,
+    error,
+    eventId,
+    timestamp: new Date().toISOString(),
+  };
 
-    // Handle consumer errors
-    consumer.on('consumer.crash', ({ payload }) => {
-      console.error('Consumer crashed:', payload.error);
-    });
+  await kafkaProducer.send({
+    topic: EVENT_TOPICS.EMAIL_FAILED,
+    messages: [{ value: JSON.stringify(payload) }],
+  });
 
-    console.log(`✅ Consumer for ${EVENT_TOPICS.NOTIFICATION_FAILED} started`);
-  } catch (error) {
-    console.error('Failed to start consumer:', error);
-    throw error;
-  }
-};
+  console.log(`⚠️ Sent ${EVENT_TOPICS.EMAIL_FAILED} for user ${userId}`);
+}
+
+module.exports = { sendEmailFailedEvent };

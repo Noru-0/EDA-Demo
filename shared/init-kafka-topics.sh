@@ -13,8 +13,6 @@ TOPICS=(
   registration.cancelled
   notification.sent
   notification.failed
-  email.sent
-  email.failed
   audit.logged
   audit.failed
 )
